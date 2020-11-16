@@ -32,7 +32,7 @@ class dashboardView(LoginRequiredMixin, View):
         context = {}
         longUrl = request.POST["longUrl"]
         print("longURL : ", longUrl)
-        x = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        x = ''.join(random.choices(string.ascii_letters + string.digits, k=4))
         urlDo = UrlList(user = request.user, longUrl = longUrl, shortUrl = x)
         urlDo.save()
         urls = UrlList.objects.filter(user = request.user)
@@ -83,7 +83,7 @@ class resolverView(View):
         print("Time : ", datetime.datetime.now())
         print("IP:", get_client_ip(request))
         print("Useragent:",request.META['HTTP_USER_AGENT'])
-        AnalyticsDo = AnalyticsList(user = request.user, ip = get_client_ip(request), userAgent = request.META['HTTP_USER_AGENT'], accessedOn= datetime.datetime.now(), shortUrl=kwargs['shortUrl'])
+        AnalyticsDo = AnalyticsList(user = urlDo.user, ip = get_client_ip(request), userAgent = request.META['HTTP_USER_AGENT'], accessedOn= datetime.datetime.now(), shortUrl=kwargs['shortUrl'])
         AnalyticsDo.save()
 
         return redirect(url)
