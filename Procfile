@@ -1,1 +1,1 @@
-web: gunicorn newtodo.wsgi 
+web: gunicorn urlShortener.wsgi 
