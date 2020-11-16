@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    
+<head>
+	<title>Dashboard</title>
+	{% comment %} <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous"> {% endcomment %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+            <a class="navbar-brand" href="#">URL Shortener</a>
+            </div>
+            <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Dashboard</a></li>
+            <li><a href="#">Analytics</a></li>
+            {% comment %} <li><a href="#">Page 2</a></li> {% endcomment %}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            <li><a href="#"><span class="glyphicon glyphicon-user"></span> Hello, {{user}}</a></li>
+            <li><a href="{% url 'logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+
+    <form class="form-inline" method="POST" action="">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="longUrl">URL:</label>
+            <input type="text" class="form-control" id="longUrl" name="longUrl">
+        </div>
+        <button type="submit" class="btn btn-default">Convert</button>
+    </form>
+    
+    <br/>
+
+    {% if urls %}
+    <table border="black" class="table table-bordered table-hover">
+    <tr>
+        <th>Long URL</th>
+        <th>Short URL</th>
+    </tr>
+
+    {% for url in urls%}
+    <tr>
+        <td>{{url.longUrl}}
+        <td><a href="/short/{{url.shortUrl}}">{{url.shortUrl}}</a>
+    </tr>
+    {% endfor %}
+
+    </table>
+    {% else %}
+    <h2>No urls was created by user</h2>
+    {% endif %}
+    </div>
+
+</body>
+</html>
