@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from urlShortenerApp.views import indexView, loginView, registerView, dashboardView, logoutView, resolverView
+from urlShortenerApp.views import indexView, loginView, registerView, dashboardView, logoutView, resolverView,analyticsView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,6 +23,7 @@ urlpatterns = [
     path('login/', loginView.as_view(), name="login"),
     path('register/', registerView.as_view(), name="register"),
     path('dashboard/', dashboardView.as_view(), name="dashboard"),
+    path('analytics/', analyticsView.as_view(), name="analytics"),
     path('logout/', logoutView.as_view(), name="logout"),
     path('short/<str:shortUrl>', resolverView.as_view(), name="resolver")
 ]

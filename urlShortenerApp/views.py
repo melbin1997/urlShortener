@@ -4,11 +4,12 @@ from django.views.generic import FormView, RedirectView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, logout
-from .models import UrlList
+from .models import UrlList, AnalyticsList
 import random, string
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 import logging
+import datetime
 
 class indexView(View):
     
@@ -79,25 +80,25 @@ class resolverView(View):
         if not "://" in url:
             url = 'http://'+url
         print("Redirecting to :",url)
-        return redirect(url)
-    # permanent = True
-    # query_string = False
-    # pattern_name = 'resolver'
+        print("Time : ", datetime.datetime.now())
+        print("IP:", get_client_ip(request))
+        print("Useragent:",request.META['HTTP_USER_AGENT'])
+        AnalyticsDo = AnalyticsList(user = request.user, ip = get_client_ip(request), userAgent = request.META['HTTP_USER_AGENT'], accessedOn= datetime.datetime.now(), shortUrl=kwargs['shortUrl'])
+        AnalyticsDo.save()
 
-    # def get_redirect_url(self, *args, **kwargs):
-    #     print("hellooooooo")
-    #     print("kwarg:", kwargs['shortUrl'])
-    #     print("kwarg:", kwargs['shortUrl'])
-    #     urlDo = UrlList.objects.get(shortUrl=kwargs['shortUrl'])
-    #     # urlDo = get_object_or_404(UrlList, shortUrl=kwargs['shortUrl'])
-    #     print("testing")
-    #     print("urlDo", urlDo)
-    #     url1 = urlDo.longUrl
-    #     if not url1.contains("://"):
-    #         url = 'http://'+url1
-    #     else:
-    #         print("false")
-    #         url = url1
-    #     print(url)
-    #     return url
-        # return super().get_redirect_url(*args, **kwargs)
+        return redirect(url)
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+class analyticsView(LoginRequiredMixin, View):
+    def get(self, request):
+        context = {}
+        items = AnalyticsList.objects.filter(user = request.user)
+        context["items"] = items
+        return render(request, "analytics.html", context)
