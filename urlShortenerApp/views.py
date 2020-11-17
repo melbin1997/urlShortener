@@ -11,8 +11,9 @@ from django.http import HttpResponse
 import logging
 import datetime
 from django.contrib.gis.geoip2 import GeoIP2
+from django.views.generic import ListView
 
-class indexView(View):
+class IndexView(View):
     
     def get(self, request):
         if request.user.is_authenticated:
@@ -21,7 +22,7 @@ class indexView(View):
         return render(request, "index.html", {"context": context})
 
 
-class dashboardView(LoginRequiredMixin, View):
+class DashboardView(LoginRequiredMixin, View):
     
     def get(self, request):
         context = {}
@@ -41,7 +42,7 @@ class dashboardView(LoginRequiredMixin, View):
         return render(request, "dashboard.html", context)
 
 
-class loginView(FormView):
+class LoginView(FormView):
     form_class = AuthenticationForm
     template_name = "login.html"
     success_url = "/dashboard"
@@ -53,17 +54,17 @@ class loginView(FormView):
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return redirect('/dashboard')
-        return super(loginView, self).get(request, *args, **kwargs)
+        return super(LoginView, self).get(request, *args, **kwargs)
 
-class logoutView(RedirectView):
+class LogoutView(RedirectView):
     url = '/'
 
     def get(self, request, *args, **kwargs):
         logout(request)
-        return super(logoutView, self).get(request, *args, **kwargs)
+        return super(LogoutView, self).get(request, *args, **kwargs)
 
 
-class registerView(FormView):
+class RegisterView(FormView):
     form_class = UserCreationForm
     template_name = "register.html"
     success_url = "/login"
@@ -72,7 +73,7 @@ class registerView(FormView):
         form.save()
         return super().form_valid(form)
 
-class resolverView(View):
+class ResolverView(View):
     
     def get(self,request, *args, **kwargs):
         print("kwargs:",kwargs)
@@ -139,9 +140,10 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
-class analyticsView(LoginRequiredMixin, View):
-    def get(self, request):
-        context = {}
-        items = AnalyticsList.objects.filter(user = request.user)
-        context["items"] = items
-        return render(request, "analytics.html", context)
+class AnalyticsView(LoginRequiredMixin, ListView):
+    context_object_name = 'items'
+    template_name = 'analytics.html'
+    paginate_by = 13
+
+    def get_queryset(self):
+        return AnalyticsList.objects.filter(user=self.request.user)

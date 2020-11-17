@@ -25,3 +25,6 @@ class AnalyticsList(models.Model):
 
     def __str__(self):
         return self.shortUrl
+
+    class Meta:
+        ordering = ['-id']
