@@ -15,6 +15,13 @@ class AnalyticsList(models.Model):
     accessedOn = models.DateTimeField(auto_now=True)
     ip = models.TextField(max_length=40)
     userAgent = models.TextField(max_length=200)
+    deviceType = models.TextField(max_length=50, null=True)
+    browserType = models.TextField(max_length=50, null=True)
+    browserVersion = models.TextField(max_length=50, null=True)
+    osType = models.TextField(max_length=50, null=True)
+    osVersion = models.TextField(max_length=50, null=True)
+    country = models.TextField(max_length=50, null=True)
+    city = models.TextField(max_length=50, null=True)
 
     def __str__(self):
         return self.shortUrl

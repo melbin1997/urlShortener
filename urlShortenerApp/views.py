@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 import logging
 import datetime
+from django.contrib.gis.geoip2 import GeoIP2
 
 class indexView(View):
     
@@ -81,9 +82,51 @@ class resolverView(View):
             url = 'http://'+url
         print("Redirecting to :",url)
         print("Time : ", datetime.datetime.now())
-        print("IP:", get_client_ip(request))
+        ip = get_client_ip(request)
+        print("IP:", ip)
         print("Useragent:",request.META['HTTP_USER_AGENT'])
-        AnalyticsDo = AnalyticsList(user = urlDo.user, ip = get_client_ip(request), userAgent = request.META['HTTP_USER_AGENT'], accessedOn= datetime.datetime.now(), shortUrl=kwargs['shortUrl'])
+
+        device_type = ""
+        browser_type = ""
+        browser_version = ""
+        os_type = ""
+        os_version = ""
+        if request.user_agent.is_mobile:
+            device_type = "Mobile"
+        if request.user_agent.is_tablet:
+            device_type = "Tablet"
+        if request.user_agent.is_pc:
+            device_type = "PC"
+        
+        browser_type = request.user_agent.browser.family
+        browser_version = request.user_agent.browser.version_string
+        os_type = request.user_agent.os.family
+        os_version = request.user_agent.os.version_string
+
+        location_country = None
+        location_city = None
+
+        try:
+            g = GeoIP2()
+            location = g.city(ip)
+            location_country = location["country_name"]
+            location_city = location["city"]
+        except:
+            print("Address Not found")
+
+        AnalyticsDo = AnalyticsList(
+            user = urlDo.user, 
+            ip = ip,
+            userAgent = request.META['HTTP_USER_AGENT'], 
+            accessedOn= datetime.datetime.now(), 
+            shortUrl=kwargs['shortUrl'],
+            deviceType = device_type,
+            browserType = browser_type,
+            browserVersion = browser_version,
+            osType = os_type,
+            osVersion = os_version,
+            country = location_country, 
+            city = location_city)
         AnalyticsDo.save()
 
         return redirect(url)

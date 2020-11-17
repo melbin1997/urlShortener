@@ -31,7 +31,14 @@
     <tr>
         <th>Short URL</th>
         <th>IP</th>
-        <th>User Agent</th>
+        <th>Country</th>
+        <th>City</th>
+        {% comment %} <th>User Agent</th> {% endcomment %}
+        <th>Device Type</th>
+        <th>Broser Type</th>
+        <th>Browser Version</th>
+        <th>OS Type</th>
+        <th>OS Version</th>
         <th>Accessed on</th>
     </tr>
 
@@ -39,7 +46,14 @@
     <tr>
         <td><a href="/short/{{item.shortUrl}}">{{request.get_host}}/short/{{item.shortUrl}}</a></td>
         <td>{{item.ip}}</td>
-        <td>{{item.userAgent}}</td>
+        <td>{{item.country}}</td>
+        <td>{{item.city}}</td>
+        {% comment %} <td>{{item.userAgent}}</td> {% endcomment %}
+        <td>{{item.deviceType}}</td>
+        <td>{{item.browserType}}</td>
+        <td>{{item.browserVersion}}</td>
+        <td>{{item.osType}}</td>
+        <td>{{item.osVersion}}</td>
         <td>{{item.accessedOn}}</td>
         
     </tr>
