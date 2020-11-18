@@ -12,6 +12,7 @@ import logging
 import datetime
 from django.contrib.gis.geoip2 import GeoIP2
 from django.views.generic import ListView
+from django.db.models import Count
 
 class IndexView(View):
     
@@ -147,3 +148,33 @@ class AnalyticsView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return AnalyticsList.objects.filter(user=self.request.user)
+
+class DetailedAnalyticsView(LoginRequiredMixin, ListView):
+    context_object_name = 'items'
+    template_name = 'detailedAnalytics.html'
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+        data['shortUrl'] = self.kwargs['shortUrl']
+        filterColumn = self.request.GET.get('filterColumn')
+        
+        return data
+
+    def get_queryset(self):
+        filterColumn = self.request.GET.get('filterColumn')
+        # print(self.request.GET.get('groupBy'))
+        if filterColumn is None:
+            return AnalyticsList.objects.filter(user=self.request.user, shortUrl=self.kwargs['shortUrl'])
+        else:
+            if self.request.session.get('groupBy',None) is not None:
+                del self.request.session['groupBy']
+            self.request.session.setdefault('groupBy',[filterColumn]).extend(self.request.GET.getlist('groupBy'))
+            # print("Session 1 : ", str(self.request.session['groupBy'])[1:-1])
+            if self.request.GET.getlist('removeGroupBy') != []:
+                # print("Remove : ",self.request.GET.getlist('removeGroupBy'))
+                for element in self.request.GET.getlist('removeGroupBy'):
+                    if element in self.request.session['groupBy']:
+                        self.request.session['groupBy'].remove(element)
+
+        return AnalyticsList.objects.filter(user=self.request.user, shortUrl=self.kwargs['shortUrl']).values(*self.request.session['groupBy']).annotate(total=Count(filterColumn)).order_by(filterColumn)

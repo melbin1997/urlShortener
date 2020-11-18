@@ -47,7 +47,7 @@
     {% for url in urls%}
     <tr>
         <td>{{url.longUrl}}</td>
-        <td><a href="/short/{{url.shortUrl}}">{{request.get_host}}/short/{{url.shortUrl}}</a></td>
+        <td><a href="/short/{{url.shortUrl}}">{{request.get_host}}/short/{{url.shortUrl}}</a> <span><a href="{% url 'analytics' %}{{url.shortUrl}}"><i class="fas fa-chart-line"></i></a></span></i></td>
     </tr>
     {% endfor %}
 

@@ -35,7 +35,7 @@
         <th>City</th>
         {% comment %} <th>User Agent</th> {% endcomment %}
         <th>Device Type</th>
-        <th>Broser Type</th>
+        <th>Browser Type</th>
         <th>Browser Version</th>
         <th>OS Type</th>
         <th>OS Version</th>
@@ -44,7 +44,7 @@
 
     {% for item in items%}
     <tr>
-        <td><a href="/short/{{item.shortUrl}}">{{request.get_host}}/short/{{item.shortUrl}}</a></td>
+        <td><a href="/short/{{item.shortUrl}}">{{request.get_host}}/short/{{item.shortUrl}}</a> <span><a href="{% url 'analytics' %}{{item.shortUrl}}"><i class="fas fa-chart-line"></i></a></span></i></td>
         <td>{{item.ip}}</td>
         <td>{{item.country}}</td>
         <td>{{item.city}}</td>

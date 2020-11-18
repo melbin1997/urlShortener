@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+    
+<head>
+	<title>Analytics</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    
+</head>
+<body>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+            <a class="navbar-brand" href="#">URL Shortener</a>
+            </div>
+            <ul class="nav navbar-nav">
+            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="active"><a href="{% url 'analytics' %}">Analytics</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            <li><a href="#"><span class="glyphicon glyphicon-user"></span> Hello, {{user}}</a></li>
+            <li><a href="{% url 'logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+
+    {% if items %}
+
+    <h2>Analytics for <a href="/short/{{shortUrl}}">{{request.get_host}}/short/{{shortUrl}}</a></h2>
+    
+    <form class="form-inline" method="GET" action="">
+        <label for="filterColumn">Group by:</label>
+        <select name="filterColumn" id="filterColumn">
+        <option value="ip">IP</option>
+        <option value="country">Country</option>
+        <option value="city">City</option>
+        <option value="deviceType">Device Type</option>
+        <option value="browserType">Browser Type</option>
+        <option value="browserVersion">Browser Version</option>
+        <option value="osType">OS Type</option>
+        <option value="osVersion">OS Version</option>
+        </select>
+        <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+    <br/>
+
+    <table class="table table-bordered table-hover">
+    <tr>
+        <th>IP <span style="float:right"><a href="{{request.get_full_path}}&groupBy=ip"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=ip"><i class="fas fa-minus-circle"></i></a></span></th>
+        <th>Country <span style="float:right"><a href="{{request.get_full_path}}&groupBy=country"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=country"><i class="fas fa-minus-circle"></i></a></span></th>
+        <th>City <span style="float:right"><a href="{{request.get_full_path}}&groupBy=city"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=city"><i class="fas fa-minus-circle"></i></a></span></th>
+        <th>Device Type <span style="float:right"><a href="{{request.get_full_path}}&groupBy=deviceType"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=deviceType"><i class="fas fa-minus-circle"></i></a></span></th>
+        <th>Browser Type <span style="float:right"><a href="{{request.get_full_path}}&groupBy=browserType"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=browserType"><i class="fas fa-minus-circle"></i></a></span></th>
+        <th>Browser Version <span style="float:right"><a href="{{request.get_full_path}}&groupBy=browserVersion"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=browserVersion"><i class="fas fa-minus-circle"></i></a></span></th>
+        <th>OS Type <span style="float:right"><a href="{{request.get_full_path}}&groupBy=osType"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=osType"><i class="fas fa-minus-circle"></i></a></span></th>
+        <th>OS Version <span style="float:right"><a href="{{request.get_full_path}}&groupBy=osVersion"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=osVersion"><i class="fas fa-minus-circle"></i></a></span></th>
+        <th>Accessed on</th>
+        <th>Count</th>
+    </tr>
+
+    {% for item in items%}
+    <tr>
+        <td>{{item.ip}}</td>
+        <td>{{item.country}}</td>
+        <td>{{item.city}}</td>
+        <td>{{item.deviceType}}</td>
+        <td>{{item.browserType}}</td>
+        <td>{{item.browserVersion}}</td>
+        <td>{{item.osType}}</td>
+        <td>{{item.osVersion}}</td>
+        <td>{{item.accessedOn}}</td>
+        <td>{{item.total}}</td>
+    </tr>
+    {% endfor %}
+
+    </table>
+    {% if is_paginated %}
+        <div class="pagination">
+            <span class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="/analytics/{{items.0.shortUrl}}?page={{ page_obj.previous_page_number }}">Previous</a>
+                {% endif %}
+                <span class="page-current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} 
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="/analytics/{{items.0.shortUrl}}?page={{ page_obj.next_page_number }}">Next</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
+    {% else %}
+        <h3>No analytics yet !!!</h3>
+        <p>Generate link and share to get analytics</p>
+    {% endif %}
+
+    </div>
+
+</body>
+<script>
+    var val = location.href.match(/[?&]filterColumn=(.*?)(?:$|&)/)[1];
+    document.getElementById("filterColumn").value = val;
+</script>
+
+</html>
