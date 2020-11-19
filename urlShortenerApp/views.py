@@ -164,7 +164,7 @@ class DetailedAnalyticsView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         filterColumn = self.request.GET.get('filterColumn')
         # print(self.request.GET.get('groupBy'))
-        if filterColumn is None:
+        if filterColumn is None or filterColumn == '':
             return AnalyticsList.objects.filter(user=self.request.user, shortUrl=self.kwargs['shortUrl'])
         else:
             if self.request.session.get('groupBy',None) is not None:

@@ -35,6 +35,7 @@
     <form class="form-inline" method="GET" action="">
         <label for="filterColumn">Group by:</label>
         <select name="filterColumn" id="filterColumn">
+        <option value="">None</option>
         <option value="ip">IP</option>
         <option value="country">Country</option>
         <option value="city">City</option>
@@ -46,6 +47,8 @@
         </select>
         <button type="submit" class="btn btn-default">Submit</button>
     </form>
+    <a href="/analytics/{{shortUrl}}"><button type="submit" class="btn btn-danger">Reset</button></a>
+    <br/>
     <br/>
 
     <table class="table table-bordered table-hover">
