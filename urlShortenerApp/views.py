@@ -13,6 +13,8 @@ import datetime
 from django.contrib.gis.geoip2 import GeoIP2
 from django.views.generic import ListView
 from django.db.models import Count
+from django.utils import timezone
+from django.http import Http404,HttpResponseNotFound
 
 class IndexView(View):
     
@@ -34,12 +36,23 @@ class DashboardView(LoginRequiredMixin, View):
     def post(self, request):
         context = {}
         longUrl = request.POST["longUrl"]
+        expiresIn = request.POST["expiresIn"]
         print("longURL : ", longUrl)
-        x = ''.join(random.choices(string.ascii_letters + string.digits, k=4))
-        urlDo = UrlList(user = request.user, longUrl = longUrl, shortUrl = x)
-        urlDo.save()
+        print("Expires in : ", expiresIn)
+        currentTime = timezone.now()
+        expiryDatetime = currentTime + datetime.timedelta(days = int(expiresIn))
+        print("Datetime : ", currentTime)
+        print("End date :", expiryDatetime)
+        if longUrl != "" and expiresIn != "":
+            x = ''.join(random.choices(string.ascii_letters + string.digits, k=4))
+            # Checks if short link is already in DB, if present then generates another link
+            while UrlList.objects.filter(shortUrl = x).first() != None:
+                x = ''.join(random.choices(string.ascii_letters + string.digits, k=4))
+            urlDo = UrlList(user = request.user, longUrl = longUrl, shortUrl = x, expiryDatetime = expiryDatetime)
+            urlDo.save()
         urls = UrlList.objects.filter(user = request.user)
         context["urls"] = urls
+        context["shortUrl"] = x
         return render(request, "dashboard.html", context)
 
 
@@ -79,59 +92,63 @@ class ResolverView(View):
     def get(self,request, *args, **kwargs):
         print("kwargs:",kwargs)
         urlDo = get_object_or_404(UrlList, shortUrl=kwargs['shortUrl'])
-        url = urlDo.longUrl
-        if not "://" in url:
-            url = 'http://'+url
-        print("Redirecting to :",url)
-        print("Time : ", datetime.datetime.now())
-        ip = get_client_ip(request)
-        print("IP:", ip)
-        print("Useragent:",request.META['HTTP_USER_AGENT'])
+        currentTime = timezone.now()
+        expiryDatetime = urlDo.expiryDatetime
+        if expiryDatetime != None and expiryDatetime > currentTime :
+            url = urlDo.longUrl
+            if not "://" in url:
+                url = 'http://'+url
+            print("Redirecting to :",url)
+            print("Time : ", datetime.datetime.now())
+            ip = get_client_ip(request)
+            print("IP:", ip)
+            print("Useragent:",request.META['HTTP_USER_AGENT'])
 
-        device_type = ""
-        browser_type = ""
-        browser_version = ""
-        os_type = ""
-        os_version = ""
-        if request.user_agent.is_mobile:
-            device_type = "Mobile"
-        if request.user_agent.is_tablet:
-            device_type = "Tablet"
-        if request.user_agent.is_pc:
-            device_type = "PC"
-        
-        browser_type = request.user_agent.browser.family
-        browser_version = request.user_agent.browser.version_string
-        os_type = request.user_agent.os.family
-        os_version = request.user_agent.os.version_string
+            device_type = ""
+            browser_type = ""
+            browser_version = ""
+            os_type = ""
+            os_version = ""
+            if request.user_agent.is_mobile:
+                device_type = "Mobile"
+            if request.user_agent.is_tablet:
+                device_type = "Tablet"
+            if request.user_agent.is_pc:
+                device_type = "PC"
+            
+            browser_type = request.user_agent.browser.family
+            browser_version = request.user_agent.browser.version_string
+            os_type = request.user_agent.os.family
+            os_version = request.user_agent.os.version_string
 
-        location_country = None
-        location_city = None
+            location_country = None
+            location_city = None
 
-        try:
-            g = GeoIP2()
-            location = g.city(ip)
-            location_country = location["country_name"]
-            location_city = location["city"]
-        except:
-            print("Address Not found")
+            try:
+                g = GeoIP2()
+                location = g.city(ip)
+                location_country = location["country_name"]
+                location_city = location["city"]
+            except:
+                print("Address Not found")
 
-        AnalyticsDo = AnalyticsList(
-            user = urlDo.user, 
-            ip = ip,
-            userAgent = request.META['HTTP_USER_AGENT'], 
-            accessedOn= datetime.datetime.now(), 
-            shortUrl=kwargs['shortUrl'],
-            deviceType = device_type,
-            browserType = browser_type,
-            browserVersion = browser_version,
-            osType = os_type,
-            osVersion = os_version,
-            country = location_country, 
-            city = location_city)
-        AnalyticsDo.save()
-
-        return redirect(url)
+            AnalyticsDo = AnalyticsList(
+                user = urlDo.user, 
+                ip = ip,
+                userAgent = request.META['HTTP_USER_AGENT'], 
+                accessedOn= datetime.datetime.now(), 
+                shortUrl=kwargs['shortUrl'],
+                deviceType = device_type,
+                browserType = browser_type,
+                browserVersion = browser_version,
+                osType = os_type,
+                osVersion = os_version,
+                country = location_country, 
+                city = location_city)
+            AnalyticsDo.save()
+            return redirect(url)
+        else:
+            return HttpResponseNotFound("<h1>Link expired</h1>")
 
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -144,7 +161,7 @@ def get_client_ip(request):
 class AnalyticsView(LoginRequiredMixin, ListView):
     context_object_name = 'items'
     template_name = 'analytics.html'
-    paginate_by = 13
+    paginate_by = 10
 
     def get_queryset(self):
         return AnalyticsList.objects.filter(user=self.request.user)
@@ -157,8 +174,8 @@ class DetailedAnalyticsView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         data['shortUrl'] = self.kwargs['shortUrl']
-        filterColumn = self.request.GET.get('filterColumn')
-        
+        data['urlData'] =  UrlList.objects.filter(user = self.request.user, shortUrl=self.kwargs['shortUrl']).first()      
+        data['currentTime'] = timezone.now()
         return data
 
     def get_queryset(self):

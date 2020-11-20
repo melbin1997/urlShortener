@@ -32,22 +32,30 @@
         <div class="form-group">
             <label for="longUrl">URL:</label>
             <input type="text" class="form-control" id="longUrl" name="longUrl">
+            <label for="expiresIn">Expires in (days):</label>
+            <input type="number" class="form-control" id="expiresIn" name="expiresIn" value="2">
         </div>
         <button type="submit" class="btn btn-default">Convert</button>
     </form>
 
+    {% if shortUrl is not None %}
+        <h4>The generated url is <a href="{{request.get_host}}/short/{{shortUrl}}">{{request.get_host}}/short/{{shortUrl}}</a></h4>
+    {% endif %}
     <br/>
+
     {% if urls %}
     <table border="black" class="table table-bordered table-hover">
     <tr>
         <th>Long URL</th>
         <th>Short URL</th>
+        <th>Expiry</th>
     </tr>
 
     {% for url in urls%}
     <tr>
         <td>{{url.longUrl}}</td>
         <td><a href="/short/{{url.shortUrl}}">{{request.get_host}}/short/{{url.shortUrl}}</a> <span><a href="{% url 'analytics' %}{{url.shortUrl}}"><i class="fas fa-chart-line"></i></a></span></i></td>
+        <td style="white-space: nowrap">{{url.expiryDatetime}}</td>
     </tr>
     {% endfor %}
 

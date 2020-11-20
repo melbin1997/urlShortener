@@ -5,6 +5,7 @@ class UrlList(models.Model):
     user = models.ForeignKey(User, verbose_name="username", on_delete=models.CASCADE)
     longUrl = models.TextField(max_length=500)
     shortUrl = models.TextField(max_length=200)
+    expiryDatetime = models.DateTimeField(auto_now=False, auto_now_add=False, null=True)
 
     def __str__(self):
         return self.longUrl

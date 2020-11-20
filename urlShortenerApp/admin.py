@@ -2,7 +2,7 @@ from django.contrib import admin
 from . import models
 
 class UrlListAdmin(admin.ModelAdmin):
-    list_display=("user", "longUrl", "shortUrl")
+    list_display=("user", "longUrl", "shortUrl", "expiryDatetime")
 class AnalyticsListAdmin(admin.ModelAdmin):
     list_display=("user", "shortUrl", "accessedOn", "ip", "userAgent")
 

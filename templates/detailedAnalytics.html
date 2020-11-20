@@ -31,7 +31,13 @@
     {% if items %}
 
     <h2>Analytics for <a href="/short/{{shortUrl}}">{{request.get_host}}/short/{{shortUrl}}</a></h2>
-    
+    <h4>Current time {{currentTime}} - 
+    {% if urlData.expiryDatetime > currentTime %}
+        Link expires at {{urlData.expiryDatetime}}</h4>
+    {% else %}
+        Link expired</h4>
+    {% endif %}
+
     <form class="form-inline" method="GET" action="">
         <label for="filterColumn">Group by:</label>
         <select name="filterColumn" id="filterColumn">
@@ -54,14 +60,14 @@
     <table class="table table-bordered table-hover">
     <tr>
         <th>IP <span style="float:right"><a href="{{request.get_full_path}}&groupBy=ip"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=ip"><i class="fas fa-minus-circle"></i></a></span></th>
-        <th>Country <span style="float:right"><a href="{{request.get_full_path}}&groupBy=country"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=country"><i class="fas fa-minus-circle"></i></a></span></th>
-        <th>City <span style="float:right"><a href="{{request.get_full_path}}&groupBy=city"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=city"><i class="fas fa-minus-circle"></i></a></span></th>
-        <th>Device Type <span style="float:right"><a href="{{request.get_full_path}}&groupBy=deviceType"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=deviceType"><i class="fas fa-minus-circle"></i></a></span></th>
-        <th>Browser Type <span style="float:right"><a href="{{request.get_full_path}}&groupBy=browserType"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=browserType"><i class="fas fa-minus-circle"></i></a></span></th>
-        <th>Browser Version <span style="float:right"><a href="{{request.get_full_path}}&groupBy=browserVersion"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=browserVersion"><i class="fas fa-minus-circle"></i></a></span></th>
-        <th>OS Type <span style="float:right"><a href="{{request.get_full_path}}&groupBy=osType"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=osType"><i class="fas fa-minus-circle"></i></a></span></th>
-        <th>OS Version <span style="float:right"><a href="{{request.get_full_path}}&groupBy=osVersion"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=osVersion"><i class="fas fa-minus-circle"></i></a></span></th>
-        <th>Accessed on</th>
+        <th style="white-space: nowrap">Country <span><a href="{{request.get_full_path}}&groupBy=country"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=country"><i class="fas fa-minus-circle"></i></a></span> </th>
+        <th style="white-space: nowrap">City <span><a href="{{request.get_full_path}}&groupBy=city"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=city"><i class="fas fa-minus-circle"></i></a></span></th>
+        <th style="white-space: nowrap">Device Type <span><a href="{{request.get_full_path}}&groupBy=deviceType"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=deviceType"><i class="fas fa-minus-circle"></i></a></span></th>
+        <th style="white-space: nowrap">Browser Type <span><a href="{{request.get_full_path}}&groupBy=browserType"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=browserType"><i class="fas fa-minus-circle"></i></a></span></th>
+        <th style="white-space: nowrap">Browser Version <span><a href="{{request.get_full_path}}&groupBy=browserVersion"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=browserVersion"><i class="fas fa-minus-circle"></i></a></span></th>
+        <th style="white-space: nowrap">OS Type <span><a href="{{request.get_full_path}}&groupBy=osType"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=osType"><i class="fas fa-minus-circle"></i></a></span></th>
+        <th style="white-space: nowrap">OS Version <span><a href="{{request.get_full_path}}&groupBy=osVersion"><i class="fas fa-plus-circle"></i></a> <a href="{{request.get_full_path}}&removeGroupBy=osVersion"><i class="fas fa-minus-circle"></i></a></span></th>
+        <th style="white-space: nowrap">Accessed on</th>
         <th>Count</th>
     </tr>
 
@@ -75,7 +81,7 @@
         <td>{{item.browserVersion}}</td>
         <td>{{item.osType}}</td>
         <td>{{item.osVersion}}</td>
-        <td>{{item.accessedOn}}</td>
+        <td style="white-space: nowrap">{{item.accessedOn}}</td>
         <td>{{item.total}}</td>
     </tr>
     {% endfor %}
