@@ -29,6 +29,10 @@ class DashboardView(LoginRequiredMixin, View):
     
     def get(self, request):
         context = {}
+        deleteUrl = request.GET.get("delete", None)
+        if deleteUrl is not None:
+            instance = UrlList.objects.get(user = request.user, shortUrl = deleteUrl)
+            instance.delete()
         urls = UrlList.objects.filter(user = request.user)
         context["urls"] = urls
         return render(request, "dashboard.html", context)
@@ -50,9 +54,9 @@ class DashboardView(LoginRequiredMixin, View):
                 x = ''.join(random.choices(string.ascii_letters + string.digits, k=4))
             urlDo = UrlList(user = request.user, longUrl = longUrl, shortUrl = x, expiryDatetime = expiryDatetime)
             urlDo.save()
+            context["shortUrl"] = x
         urls = UrlList.objects.filter(user = request.user)
         context["urls"] = urls
-        context["shortUrl"] = x
         return render(request, "dashboard.html", context)
 
 
