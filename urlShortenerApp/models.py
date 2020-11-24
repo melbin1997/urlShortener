@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+import random, string
+
 
 class UrlList(models.Model):
     user = models.ForeignKey(User, verbose_name="username", on_delete=models.CASCADE)
@@ -9,6 +11,14 @@ class UrlList(models.Model):
 
     def __str__(self):
         return self.longUrl
+
+    def save(self, *args, **kwargs):
+        x = ''.join(random.choices(string.ascii_letters + string.digits, k=4))
+        # Checks if short link is already in DB, if present then generates another link
+        while UrlList.objects.filter(shortUrl = x).first() != None:
+            x = ''.join(random.choices(string.ascii_letters + string.digits, k=4))
+        self.shortUrl = x
+        return super(UrlList, self).save(*args, **kwargs)
 
 class AnalyticsList(models.Model):
     user = models.ForeignKey(User, verbose_name="username", on_delete=models.CASCADE)

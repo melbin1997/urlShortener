@@ -48,13 +48,9 @@ class DashboardView(LoginRequiredMixin, View):
         print("Datetime : ", currentTime)
         print("End date :", expiryDatetime)
         if longUrl != "" and expiresIn != "":
-            x = ''.join(random.choices(string.ascii_letters + string.digits, k=4))
-            # Checks if short link is already in DB, if present then generates another link
-            while UrlList.objects.filter(shortUrl = x).first() != None:
-                x = ''.join(random.choices(string.ascii_letters + string.digits, k=4))
-            urlDo = UrlList(user = request.user, longUrl = longUrl, shortUrl = x, expiryDatetime = expiryDatetime)
+            urlDo = UrlList(user = request.user, longUrl = longUrl, expiryDatetime = expiryDatetime)
             urlDo.save()
-            context["shortUrl"] = x
+            context["shortUrl"] = urlDo.shortUrl
         urls = UrlList.objects.filter(user = request.user)
         context["urls"] = urls
         return render(request, "dashboard.html", context)

@@ -45,8 +45,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'urlShortenerApp',
+    'api',
     'django_user_agents',
-    'geoip2'
+    'geoip2',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
