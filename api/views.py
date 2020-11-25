@@ -6,9 +6,10 @@ from rest_framework import viewsets
 from .serializers import UrlListSerializer
 
 
-class DashboardApiView(viewsets.ModelViewSet):
+class DashboardApiViewSet(viewsets.ModelViewSet):
     serializer_class = UrlListSerializer
     permission_classes = [permissions.IsAuthenticated]
+    lookup_field = "shortUrl"
     def get_queryset(self):
         return UrlList.objects.filter(user=self.request.user)
     def perform_create(self, serializer):

@@ -1,8 +1,13 @@
 
 from django.contrib import admin
-from django.urls import path
-from .views import DashboardApiView
+from django.urls import path, include
+from . import views
+from rest_framework import routers
+
+router = routers.DefaultRouter()
+router.register(r'dashboard', views.DashboardApiViewSet, basename="dashboard")
 
 urlpatterns = [
-    path('dashboard/', DashboardApiView.as_view({'get':'list','post':'create'}), name='dashboardApi'),
+    path('', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls')),
 ]
