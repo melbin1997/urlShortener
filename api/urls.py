@@ -6,6 +6,8 @@ from rest_framework import routers
 
 router = routers.DefaultRouter()
 router.register(r'dashboard', views.DashboardApiViewSet, basename="dashboard")
+router.register(r'analytics', views.AnalyticsApiViewSet, basename="analytics")
+router.register(r'short', views.ResolverApiView, basename="short")
 
 urlpatterns = [
     path('', include(router.urls)),
