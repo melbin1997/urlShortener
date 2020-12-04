@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    
+<head>
+	<title>Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+            <a class="navbar-brand" href="#">URL Shortener</a>
+            </div>
+            <ul class="nav navbar-nav">
+            <li class="active"><a href="{% url 'dashboard2' %}">Dashboard</a></li>
+            <li><a href="{% url 'analytics2' %}">Analytics</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            <li><a href="#"><span class="glyphicon glyphicon-user"></span> Hello, {{user}}</a></li>
+            <li><a href="{% url 'logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+
+    <form class="form-inline" method="POST" action="" id="createUrl">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="longUrl">URL:</label>
+            <input type="text" class="form-control" id="longUrl" name="longUrl">
+            <label for="expiresIn">Expires in (days):</label>
+            <input type="number" class="form-control" id="expiresIn" name="expiresIn" value="2" min="1" max="31">
+        </div>
+        <button type="submit" class="btn btn-default">Convert</button>
+    </form>
+
+    <div id="infoSection"></div>
+    <br/>
+    <div id="dashboardData"></div>
+
+
+    </div>
+
+</body>
+
+<script>
+    
+    $(document).ready(function() {
+        $(document).on('click', '.deleteButton', function(){
+            var $this = $(this);
+            var deleteUrl = $(this).val();
+            $.ajax({
+                type: 'DELETE',
+                url: document.location.origin+"/api/dashboard/"+deleteUrl+"/",
+                data: { shortUrl: $(this).val(), csrfmiddlewaretoken: '{{ csrf_token }}'},
+                beforeSend:function(xhr){
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token}}');
+
+                },
+                success: function() {
+                    $this.closest('tr').remove();
+
+                    $('#infoSection').html("Deleted "+deleteUrl);
+                }
+            });
+        });
+
+        $("#createUrl").submit(function(){
+            var date = new Date();
+            days = parseInt($("#expiresIn").val(), 10);
+            date.setDate(date.getDate() + days);
+            
+            var data = {}
+            data.longUrl = $('#longUrl').val();
+            data.expiryDatetime = date.toISOString();
+            data.user = '{{request.user.id}}';
+
+            $.ajax({
+                url: document.location.origin+"/api/dashboard/", 
+                data: data,
+                type: "POST", 
+                dataType: 'json',
+                beforeSend: function (xhr, settings) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                },
+                success: function (e) {
+                    var shortUrl = document.location.origin+"/api/short/"+e.shortUrl;
+                    $('#infoSection').html('<h4>The generated url is <a href="'+shortUrl+'">'+shortUrl+'</a>');
+                    var table = $('table');
+                    table.append("<tr><td>"+e.longUrl+"</td><td><a href='"+shortUrl+"'>"+shortUrl+"</td><td>"+e.expiryDatetime+"</td><td><button type='submit' class='btn btn-danger deleteButton' value='"+e.shortUrl+"'>Delete</button></td></tr>");
+                    console.log(JSON.stringify(e));
+
+
+                },
+                error:function(e){
+                    console.log(JSON.stringify(e));
+
+
+                }
+            }); 
+            return false;
+        });
+        
+    $.ajax({
+        url: document.location.origin+"/api/dashboard/"
+    }).then(function(data) {
+        if(data.length == 0){
+        $('#dashboardData').append("<h2>No urls was created by user</h2>");
+        }
+        else{
+            var table = $('<table border="black" class="table table-bordered table-hover"><tr><th>Long URL</th><th>Short URL</th><th>Expiry</th><th>Action</th></tr>');
+            $.each(data, function(index, row){
+                var shortUrl = document.location.origin+"/api/short/"+row.shortUrl;
+                table.append("<tr><td>"+row.longUrl+"</td><td><a href='"+shortUrl+"'>"+shortUrl+"</td><td>"+row.expiryDatetime+"</td><td><button type='submit' class='btn btn-danger deleteButton' value='"+row.shortUrl+"'>Delete</button></td></tr>");
+            });
+            table.append("</table>");
+            $('#dashboardData').append(table);
+        }
+
+    });
+    
+});
+</script>
+</html>

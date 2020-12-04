@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+    
+<head>
+	<title>Analytics</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+            <a class="navbar-brand" href="#">URL Shortener</a>
+            </div>
+            <ul class="nav navbar-nav">
+            <li><a href="{% url 'dashboard2' %}">Dashboard</a></li>
+            <li class="active"><a href="{% url 'analytics2' %}">Analytics</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+            <li><a href="#"><span class="glyphicon glyphicon-user"></span> Hello, {{user}}</a></li>
+            <li><a href="{% url 'logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+    
+        <div id="infoSection"></div>
+        <br/>
+        <div id="analyticsData"></div>
+
+    </div>
+
+</body>
+
+<script>
+    
+    $(document).ready(function() {
+        if('{{shortUrl}}' == ""){
+            $.ajax({
+                url: document.location.origin+"/api/analytics2/"
+            }).then(function(data) {
+                if(data.length == 0){
+                $('#analyticsData').append("<h2>No analytics was found for user</h2>");
+                }
+                else{
+                    var table = $('<table border="black" class="table table-bordered table-hover"><tr><th>Short URL</th><th>IP</th><th>Country</th><th>City</th><th>Device Type</th><th>Browser Type</th><th>Browser Version</th><th>OS Type</th><th>OS Version</th><th>Accessed on</th></tr>');
+                    $.each(data, function(index, row){
+                        var shortUrl = document.location.origin+"/api/short/"+row.shortUrl;
+                        table.append("<tr><td><a href='"+shortUrl+"'>"+shortUrl+"</a> <span><a href={% url 'analytics2' %}"+row.shortUrl+"><i class='fas fa-chart-line'></i></a></span></td><td>"+row.ip+"</td><td>"+row.country+"</td><td>"+row.city+"</td><td>"+row.deviceType+"</td><td>"+row.browserType+"</td><td>"+row.browserVersion+"</td><td>"+row.osType+"</td><td>"+row.osVersion+"</td><td>"+row.accessedOn+"</td></tr>");
+                    });
+                    table.append("</table>");
+                    $('#analyticsData').append(table);
+                }
+            });
+        }
+        else{
+            $.ajax({
+                url: document.location.origin+"/api/analytics2/{{shortUrl}}"
+            }).then(function(data) {
+                $.ajax({
+                    url: document.location.origin+"/api/dashboard/{{shortUrl}}"
+                }).then(function(data2) {
+                if(data.length == 0){
+                $('#analyticsData').append("<h2>No analytics yet for link / Link expired</h2>");
+                }
+                else{
+                    $('#analyticsData').append('<h2>Analytics for <a href="/short/{{shortUrl}}">{{request.get_host}}/short/{{shortUrl}}</a></h2>');
+                    var timeSection = "";
+                    timeSection += '<h4>Current time {{currentTime}} - ';
+                    console.log(data2.expiryDatetime);
+                    console.log(data2.expiryDatetime > '{{currentTime}}');
+
+                    if(data2.expiryDatetime < '{{currentTime}}'){
+                        timeSection += 'Link expires at '+new Date(data2.expiryDatetime);
+                    }
+                    else{
+                        timeSection += 'Link expired';
+                    }
+                    timeSection += '</h4>';
+                    console.log(timeSection);
+                    $('#analyticsData').append(timeSection);
+
+                    var table = $('<table border="black" class="table table-bordered table-hover"><tr><th>IP</th><th>Country</th><th>City</th><th>Device Type</th><th>Browser Type</th><th>Browser Version</th><th>OS Type</th><th>OS Version</th><th>Accessed on</th></tr>');
+                    $.each(data, function(index, row){
+                        var shortUrl = document.location.origin+"/api/short/"+row.shortUrl;
+                        table.append("<tr><td>"+row.ip+"</td><td>"+row.country+"</td><td>"+row.city+"</td><td>"+row.deviceType+"</td><td>"+row.browserType+"</td><td>"+row.browserVersion+"</td><td>"+row.osType+"</td><td>"+row.osVersion+"</td><td>"+row.accessedOn+"</td></tr>");
+                    });
+                    table.append("</table>");
+                    $('#analyticsData').append(table);
+                }
+                });
+            });
+
+        }
+
+    });
+</script>
+
+</html>

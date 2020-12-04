@@ -16,7 +16,7 @@
             </div>
             <ul class="nav navbar-nav">
             <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            <li class="active"><a href="#">Analytics</a></li>
+            <li class="active"><a href="{% url 'analytics' %}">Analytics</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
             <li><a href="#"><span class="glyphicon glyphicon-user"></span> Hello, {{user}}</a></li>
@@ -33,7 +33,6 @@
         <th>IP</th>
         <th>Country</th>
         <th>City</th>
-        {% comment %} <th>User Agent</th> {% endcomment %}
         <th>Device Type</th>
         <th>Browser Type</th>
         <th>Browser Version</th>
@@ -44,11 +43,10 @@
 
     {% for item in items%}
     <tr>
-        <td><a href="/short/{{item.shortUrl}}">{{request.get_host}}/short/{{item.shortUrl}}</a> <span><a href="{% url 'analytics' %}{{item.shortUrl}}"><i class="fas fa-chart-line"></i></a></span></i></td>
+        <td><a href="/short/{{item.shortUrl}}">{{request.get_host}}/short/{{item.shortUrl}}</a> <span><a href="{% url 'analytics' %}{{item.shortUrl}}"><i class="fas fa-chart-line"></i></a></span></td>
         <td>{{item.ip}}</td>
         <td>{{item.country}}</td>
         <td>{{item.city}}</td>
-        {% comment %} <td>{{item.userAgent}}</td> {% endcomment %}
         <td>{{item.deviceType}}</td>
         <td>{{item.browserType}}</td>
         <td>{{item.browserVersion}}</td>

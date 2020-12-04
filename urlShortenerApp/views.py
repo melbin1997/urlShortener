@@ -59,15 +59,19 @@ class DashboardView(LoginRequiredMixin, View):
 class LoginView(FormView):
     form_class = AuthenticationForm
     template_name = "login.html"
-    success_url = "/dashboard"
-
+    def get_success_url(self):
+        next_url = self.request.GET.get('next',None)
+        if next_url:
+            return "%s" % (next_url)
+        else :
+            return '/chooseDashboard'
     def form_valid(self, form):
         login(self.request, form.get_user())
         return super().form_valid(form)
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            return redirect('/dashboard')
+            return redirect('/chooseDashboard')
         return super(LoginView, self).get(request, *args, **kwargs)
 
 class LogoutView(RedirectView):

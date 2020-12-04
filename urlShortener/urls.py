@@ -16,6 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from urlShortenerApp.views import IndexView, LoginView, RegisterView, DashboardView, LogoutView, ResolverView,AnalyticsView,DetailedAnalyticsView
+from django.views.generic.base import TemplateView
+from django.contrib.auth.decorators import login_required
+from api.views import DetailedAnalyticsApiView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,5 +30,9 @@ urlpatterns = [
     path('analytics/', AnalyticsView.as_view(), name="analytics"),
     path('logout/', LogoutView.as_view(), name="logout"),
     path('short/<str:shortUrl>', ResolverView.as_view(), name="resolver"),
+    path('dashboard2/', login_required(TemplateView.as_view(template_name='dashboard2.html')), name="dashboard2"),
+    path('analytics2/<str:shortUrl>', DetailedAnalyticsApiView.as_view()),
+    path('analytics2/', login_required(TemplateView.as_view(template_name='analytics2.html')), name="analytics2"),
     path('api/', include('api.urls')),
+    path('chooseDashboard/', login_required(TemplateView.as_view(template_name='chooseDashboard.html')), name="chooseDashboard"),
 ]

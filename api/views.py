@@ -9,6 +9,9 @@ from django.contrib.gis.geoip2 import GeoIP2
 from django.utils import timezone
 from django.http import HttpResponseNotFound
 import datetime
+from django.views.generic.base import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 class DashboardApiViewSet(viewsets.ModelViewSet):
     serializer_class = UrlListSerializer
@@ -108,3 +111,11 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
+class DetailedAnalyticsApiView(LoginRequiredMixin ,TemplateView):
+   template_name = 'analytics2.html'
+
+   def get_context_data(self, **kwargs):
+       context = super(DetailedAnalyticsApiView, self).get_context_data(**kwargs)
+       context['currentTime'] = timezone.now()
+       return context
