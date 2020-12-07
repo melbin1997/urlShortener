@@ -91,7 +91,7 @@
                     var shortUrl = document.location.origin+"/api/short/"+e.shortUrl;
                     $('#infoSection').html('<h4>The generated url is <a href="'+shortUrl+'">'+shortUrl+'</a>');
                     var table = $('table');
-                    table.append("<tr><td>"+e.longUrl+"</td><td><a href='"+shortUrl+"'>"+shortUrl+"</td><td>"+e.expiryDatetime+"</td><td><button type='submit' class='btn btn-danger deleteButton' value='"+e.shortUrl+"'>Delete</button></td></tr>");
+                    table.prepend("<tr><td>"+e.longUrl+"</td><td><a href='"+shortUrl+"'>"+shortUrl+" <span><a href='{% url 'analytics2' %}"+e.shortUrl+"'><i class='fas fa-chart-line'></i></a></span></td><td>"+e.expiryDatetime+"</td><td><button type='submit' class='btn btn-danger deleteButton' value='"+e.shortUrl+"'>Delete</button></td></tr>");
                     console.log(JSON.stringify(e));
 
 
@@ -104,25 +104,64 @@
             }); 
             return false;
         });
+
+        $(document).on('click', '.navigatePage', function(e){
+            e.preventDefault();
+            var urlParams = getUrlVars($(this).attr('href'));
+            ajaxRequest(urlParams.page);
+        });
         
-    $.ajax({
-        url: document.location.origin+"/api/dashboard/"
+    function ajaxRequest(page){ 
+        page = page || '1'
+        $.ajax({
+        url: document.location.origin+"/api/dashboard/?page="+page
     }).then(function(data) {
+        console.log(data);
+        $('#dashboardData').empty();
         if(data.length == 0){
         $('#dashboardData').append("<h2>No urls was created by user</h2>");
         }
         else{
-            var table = $('<table border="black" class="table table-bordered table-hover"><tr><th>Long URL</th><th>Short URL</th><th>Expiry</th><th>Action</th></tr>');
-            $.each(data, function(index, row){
+            var table = $('<table border="black" class="table table-bordered table-hover"><thead><tr><th>Long URL</th><th>Short URL</th><th>Expiry</th><th>Action</th></tr></thead><tbody>');
+            $.each(data.results, function(index, row){
+
                 var shortUrl = document.location.origin+"/api/short/"+row.shortUrl;
-                table.append("<tr><td>"+row.longUrl+"</td><td><a href='"+shortUrl+"'>"+shortUrl+"</td><td>"+row.expiryDatetime+"</td><td><button type='submit' class='btn btn-danger deleteButton' value='"+row.shortUrl+"'>Delete</button></td></tr>");
+                table.append("<tr><td>"+row.longUrl+"</td><td><a href='"+shortUrl+"'>"+shortUrl+" <span><a href='{% url 'analytics2' %}"+row.shortUrl+"'><i class='fas fa-chart-line'></i></a></span></td><td>"+row.expiryDatetime+"</td><td><button type='submit' class='btn btn-danger deleteButton' value='"+row.shortUrl+"'>Delete</button></td></tr>");
             });
-            table.append("</table>");
+            table.append("</tbody></table>");
             $('#dashboardData').append(table);
         }
 
+        if(data.previous != null){
+            var urlParams = getUrlVars(data.previous);
+            if(urlParams.page !== undefined){
+            $('#dashboardData').append('<a href="?page='+urlParams.page+'" class="navigatePage">Previous</a>');
+            }
+            else{
+                $('#dashboardData').append('<a href="?page=1" class="navigatePage">Previous</a>');
+            }
+        }
+        if(data.next != null){
+            var urlParams = getUrlVars(data.next);
+            $('#dashboardData').append(' <a href="?page='+urlParams.page+'" class="navigatePage">Next</a>');
+        }
     });
+    }
+    ajaxRequest();
     
 });
+
+function getUrlVars(url)
+{
+    var vars = [], hash;
+    var hashes = url.slice(url.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
+}
 </script>
 </html>

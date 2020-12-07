@@ -20,6 +20,9 @@ class UrlList(models.Model):
         self.shortUrl = x
         return super(UrlList, self).save(*args, **kwargs)
 
+    class Meta:
+        ordering = ['-id']
+
 class AnalyticsList(models.Model):
     user = models.ForeignKey(User, verbose_name="username", on_delete=models.CASCADE)
     shortUrl = models.TextField(max_length=200, default="null")

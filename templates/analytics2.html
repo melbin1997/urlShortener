@@ -38,23 +38,51 @@
 <script>
     
     $(document).ready(function() {
-        if('{{shortUrl}}' == ""){
+        
+        $(document).on('click', '.navigatePage', function(e){
+            e.preventDefault();
+            var urlParams = getUrlVars($(this).attr('href'));
+            ajaxRequest(urlParams.page);
+        });
+        
+        function ajaxRequest(page){ 
+            page = page || '1'
             $.ajax({
-                url: document.location.origin+"/api/analytics2/"
+                url: document.location.origin+"/api/analytics2/?page="+page
             }).then(function(data) {
+                $('#analyticsData').empty();
                 if(data.length == 0){
                 $('#analyticsData').append("<h2>No analytics was found for user</h2>");
                 }
                 else{
                     var table = $('<table border="black" class="table table-bordered table-hover"><tr><th>Short URL</th><th>IP</th><th>Country</th><th>City</th><th>Device Type</th><th>Browser Type</th><th>Browser Version</th><th>OS Type</th><th>OS Version</th><th>Accessed on</th></tr>');
-                    $.each(data, function(index, row){
+                    $.each(data.results, function(index, row){
                         var shortUrl = document.location.origin+"/api/short/"+row.shortUrl;
                         table.append("<tr><td><a href='"+shortUrl+"'>"+shortUrl+"</a> <span><a href={% url 'analytics2' %}"+row.shortUrl+"><i class='fas fa-chart-line'></i></a></span></td><td>"+row.ip+"</td><td>"+row.country+"</td><td>"+row.city+"</td><td>"+row.deviceType+"</td><td>"+row.browserType+"</td><td>"+row.browserVersion+"</td><td>"+row.osType+"</td><td>"+row.osVersion+"</td><td>"+row.accessedOn+"</td></tr>");
                     });
                     table.append("</table>");
                     $('#analyticsData').append(table);
+
+                    if(data.previous != null){
+                        var urlParams = getUrlVars(data.previous);
+                        if(urlParams.page !== undefined){
+                            $('#analyticsData').append('<a href="?page='+urlParams.page+'" class="navigatePage">Previous</a>');
+                        }
+                        else{
+                            $('#analyticsData').append('<a href="?page=1" class="navigatePage">Previous</a>');
+                        }
+                    }
+                    if(data.next != null){
+                        var urlParams = getUrlVars(data.next);
+                        $('#analyticsData').append(' <a href="?page='+urlParams.page+'" class="navigatePage">Next</a>');
+                    }
                 }
             });
+
+        }
+
+        if('{{shortUrl}}' == ""){
+            ajaxRequest();
         }
         else{
             $.ajax({
@@ -97,6 +125,19 @@
         }
 
     });
+
+    function getUrlVars(url)
+    {
+        var vars = [], hash;
+        var hashes = url.slice(url.indexOf('?') + 1).split('&');
+        for(var i = 0; i < hashes.length; i++)
+        {
+            hash = hashes[i].split('=');
+            vars.push(hash[0]);
+            vars[hash[0]] = hash[1];
+        }
+        return vars;
+    }
 </script>
 
 </html>

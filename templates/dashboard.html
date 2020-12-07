@@ -55,7 +55,7 @@
     {% for url in urls%}
     <tr>
         <td>{{url.longUrl}}</td>
-        <td><a href="/short/{{url.shortUrl}}">{{request.get_host}}/short/{{url.shortUrl}}</a> <span><a href="{% url 'analytics' %}{{url.shortUrl}}"><i class="fas fa-chart-line"></i></a></span></i></td>
+        <td><a href="/short/{{url.shortUrl}}">{{request.get_host}}/short/{{url.shortUrl}}</a> <span><a href="{% url 'analytics' %}{{url.shortUrl}}"><i class="fas fa-chart-line"></i></a></span></td>
         <td style="white-space: nowrap">{{url.expiryDatetime}}</td>
         <td><a href="?delete={{url.shortUrl}}"><button type="submit" class="btn btn-danger" value="test">Delete</button></a></td>
     </tr>
