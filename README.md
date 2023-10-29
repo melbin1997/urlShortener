@@ -1,2 +1,2 @@
 # urlShortener
-Project to shorten URLs
+Project to shorten URLs in Django
